@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
 })
 
 // GET /api/posts/:id
+
 router.get('/:id', async (req, res) => {
     Post.findById(req.params.id)
         .then(posts => {
@@ -75,38 +76,74 @@ router.post('/', (req, res) => {
 })
 
 // PUT /api/posts/:id
-router.put('/:id', (req, res) => {
-    const changes = req.body
-    const id = req.params.id
-    
-    if (!changes.title || !changes.contents) {
+
+router.put('/:id', (req, res) =>{
+    const { title, contents } = req.body
+    if (!title || !contents) {
         res.status(400).json({
-            message: 'Please provide title and contents for the post',
+            message: 'Please provide title and contents for this post'
         })
-    }
-    else {
-            updatedPost = Post.update(id, changes)
+    } else {
+        Post.findById(req.params.id)
             .then(post => {
-                Post.findById(id)
-                if (post) {
-                    res.status(200).json(post)
+                if(!post) {
+                    res.status(404).json({
+                        message:'The post with the specified ID does not exist'
+                    })
                 } else {
-                    Post.findById(id)
-                    if (!post) {
-                        res.status(404).json({
-                            message: 'The post with the specified ID does not exist'
-                        })
-                    }
+                    return Post.update(req.params.id, req.body)
                 }
             })
-            .catch(error => {
+            .then(data => {
+                if (data) {
+                    return Post.findById(req.params.id)
+                }
+            })
+            .then(post => {
+                if(post) {
+                    res.json(post)
+                }
+            })
+            .catch(err =>{
                 res.status(500).json({
-                    message: 'The post information could not be modified',
-                    error: error.message
+                    message:'The post information could not be modified'
                 })
             })
     }
 })
+
+// router.put('/:id', (req, res) => {
+//     const changes = req.body
+//     const id = req.params.id
+    
+//     if (!changes.title || !changes.contents) {
+//         res.status(400).json({
+//             message: 'Please provide title and contents for the post',
+//         })
+//     }
+//     else {
+//             updatedPost = Post.update(id, changes)
+//             .then(post => {
+//                 Post.findById(id)
+//                 if (post) {
+//                     res.status(200).json(post)
+//                 } else {
+//                     Post.findById(id)
+//                     if (!post) {
+//                         res.status(404).json({
+//                             message: 'The post with the specified ID does not exist'
+//                         })
+//                     }
+//                 }
+//             })
+//             .catch(error => {
+//                 res.status(500).json({
+//                     message: 'The post information could not be modified',
+//                     error: error.message
+//                 })
+//             })
+//     }
+// })
 
 
 // GET /api/posts/:id/comments
