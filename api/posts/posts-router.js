@@ -85,11 +85,11 @@ router.put('/:id', (req, res) => {
         })
     }
     else {
-        Post.update(req.params.id, changes)
+            updatedPost = Post.update(id, changes)
             .then(post => {
+                Post.findById(id)
                 if (post) {
-                    const updatedPost = Post.findById(id)
-                    res.status(200).json(updatedPost)
+                    res.status(200).json(post)
                 } else {
                     Post.findById(id)
                     if (!post) {
